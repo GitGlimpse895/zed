@@ -337,6 +337,32 @@ mod tests {
     }
 
     #[test]
+    fn test_markdown_escaped_pipe() {
+        // Pipe must be escaped so that it does not break table column delimiters.
+        assert_eq!(MarkdownEscaped("a|b").to_string(), r"a\|b");
+        assert_eq!(MarkdownEscaped("no pipe").to_string(), "no pipe");
+        assert_eq!(MarkdownEscaped("|leading").to_string(), r"\|leading");
+        assert_eq!(MarkdownEscaped("trailing|").to_string(), r"trailing\|");
+    }
+
+    #[test]
+    fn test_markdown_escaped_ordered_list_period() {
+        // A period immediately after digits at the start of a line must be escaped
+        // to avoid being parsed as an ordered-list item marker.
+        assert_eq!(MarkdownEscaped("1. item").to_string(), r"1\. item");
+        assert_eq!(MarkdownEscaped("42. answer").to_string(), r"42\. answer");
+        // Period not at line-start: no escape needed.
+        assert_eq!(MarkdownEscaped("v1.2.3").to_string(), "v1.2.3");
+        // Digit-period sequence preceded by non-digit on same line: not an OL marker.
+        assert_eq!(MarkdownEscaped("x 1. y").to_string(), r"x 1. y");
+        // Multi-line: only the line-start occurrence is escaped.
+        assert_eq!(
+            MarkdownEscaped("intro\n1. item\nv2.0").to_string(),
+            "intro\n1\\. item\nv2.0"
+        );
+    }
+
+    #[test]
     fn test_markdown_inline_code() {
         assert_eq!(MarkdownInlineCode(" ").to_string(), "` `");
         assert_eq!(MarkdownInlineCode("text").to_string(), "`text`");
