@@ -76,6 +76,8 @@ impl Display for MarkdownString {
 /// * `$` for inline math
 /// * `~` for strikethrough
 ///
+/// Also escapes `|` (pipe), which is a column separator in Markdown tables.
+///
 /// Escape of some characters is unnecessary, because while they are involved in markdown syntax,
 /// the other characters involved are escaped:
 ///
@@ -84,8 +86,8 @@ impl Display for MarkdownString {
 ///
 /// * `;` is used in HTML entity syntax, but `&` is escaped, so they are parsed as plaintext.
 ///
-/// TODO: There is one escape this doesn't do currently. Period after numbers at the start of the
-/// line (`[0-9]*\.`) should also be escaped to avoid it being interpreted as a list item.
+/// Periods that follow one or more digits at the start of a line (`[0-9]+\.`) are escaped to
+/// prevent them from being interpreted as ordered-list item markers.
 pub struct MarkdownEscaped<'a>(pub &'a str);
 
 /// Implements `Display` to format markdown inline code (wrapped in backticks), handling code that
